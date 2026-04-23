@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
+// const groq = new Groq({
+//   apiKey: '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', //ayan's key
+// });
+
 const groq = new Groq({
-  apiKey: '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',
+  apiKey: "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", // my key
 });
 
 export async function POST(request) {
@@ -97,9 +101,7 @@ export async function POST(request) {
     } else {
       // Advice mode prompt (auto-generated summary)
       userPrompt = `
-        You are a finance expert/advisor/assistant with knowledge of programming.
-
-        Analyze the user's finances based on the following data (provided as JavaScript arrays of objects):
+        You are Alfred, a financial expert. Based on the following data, provide a 2-3 line financial summary: 
 
         - Budget List: ${JSON.stringify(totalBudget)}
         - Income List: ${JSON.stringify(totalIncome)}
@@ -123,7 +125,8 @@ export async function POST(request) {
     try {
       console.log("[Alfred Route] Sending message to Groq...");
       const response = await groq.chat.completions.create({
-        model: "groq/compound-mini",
+        // model: "groq/compound-mini", //ayan's model
+        model:"llama-3.1-8b-instant",
         messages: [
           {
             role: "user",
@@ -131,7 +134,7 @@ export async function POST(request) {
           },
         ],
         temperature: 1,
-        max_tokens: 8192,
+        max_tokens: 500 //8192,
       });
 
       const res = response.choices[0]?.message?.content || "";
