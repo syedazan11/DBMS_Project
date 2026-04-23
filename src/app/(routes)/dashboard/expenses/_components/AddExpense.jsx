@@ -38,7 +38,9 @@ const AddExpense = ({ data }) => {
   });
 
   const onSubmit = async (body) => {
-    if (!user?.primaryEmailAddress?.emailAddress) return;
+    // 1. Safety check for the numeric ID
+    if (!user?.id) return; 
+
     setLoading(true);
     try {
       data
@@ -46,10 +48,9 @@ const AddExpense = ({ data }) => {
             .update(expenses)
             .set({
               name: body.name,
-              amount: body.amount,
+              amount: parseFloat(body.amount),
               budgetId: parseFloat(body.budgetId),
-              createdBy: user.primaryEmailAddress.emailAddress,
-              createdAt: body.createdAt,
+              userId: user.id, // 2. Use userId instead of createdBy
               updatedAt: new Date(),
             })
             .where(eq(expenses.id, data.id))
@@ -57,20 +58,22 @@ const AddExpense = ({ data }) => {
             name: body.name,
             amount: parseFloat(body.amount),
             budgetId: parseFloat(body.budgetId),
-            createdBy: user.primaryEmailAddress.emailAddress,
+            userId: user.id, // 3. Use userId instead of createdBy
             createdAt: new Date(),
             updatedAt: new Date(),
           });
+          
       getAllExpenses();
-      toast.success("Expense Added!");
+      toast.success(data ? "Expense Updated!" : "Expense Added!");
     } catch (error) {
+      console.error(error);
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
       reset();
     }
   };
-
+  
   return (
     <DialogHeader>
       <DialogTitle>{data ? "Edit Expense" : "Add Expense"}</DialogTitle>

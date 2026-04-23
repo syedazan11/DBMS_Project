@@ -33,7 +33,9 @@ const CreateBudget = ({ data, close }) => {
   });
 
   const onSubmit = async (body) => {
-    if (!user?.primaryEmailAddress?.emailAddress) return;
+    // 1. Change check to user?.id (Primary Key check)
+    if (!user?.id) return; 
+    
     setLoading(true);
     try {
       data
@@ -42,26 +44,28 @@ const CreateBudget = ({ data, close }) => {
             .set({
               name: body.name,
               amount: body.amount,
-              createdBy: user.primaryEmailAddress.emailAddress,
+              userId: user.id, // 2. Use userId instead of createdBy
               Icon: body.Icon,
             })
             .where(eq(Budgets.id, data.id))
         : await db.insert(Budgets).values({
             name: body.name,
             amount: body.amount,
-            createdBy: user.primaryEmailAddress.emailAddress,
+            userId: user.id, // 3. Use userId instead of createdBy
             Icon: body.Icon || emojiIcon,
           });
+          
       getBudgetList();
       toast.success(data ? "Budget Updated" : "Budget Created!");
     } catch (error) {
+      console.error(error); // Log the error for debugging
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
       reset();
     }
   };
-
+  
   const onDelete = async () => {
     try {
       await db.delete(Budgets).where(eq(Budgets.id, data.id));

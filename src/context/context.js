@@ -18,26 +18,29 @@ export const GlobalContextProvider = ({ children }) => {
   const screenWidth = useWindowWidth();
   const mobileScreen = screenWidth < 1000;
 
-  const getBudgetList = async () => {
+const getBudgetList = async () => {
+    if (!user?.id) return;
     const result = await db
       .select({
         id: Budgets.id,
         Icon: Budgets.Icon,
         name: Budgets.name,
-        createdBy: Budgets.createdBy,
+        // Removed createdBy (redundant email)
         totalItem: sql`count(${Budgets.id})`,
         totalSpend: sql`sum(${expenses.amount})`,
         amount: Budgets.amount,
       })
       .from(Budgets)
       .leftJoin(expenses, eq(Budgets.id, expenses.budgetId))
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
+      .where(eq(Budgets.userId, user.id)) // Now filtering by numeric ID
       .groupBy(Budgets.id)
       .orderBy(desc(Budgets.id));
-    result.length > 0 ? setBudgetList(result) : setBudgetList("");
+    
+    setBudgetList(result.length > 0 ? result : []);
   };
 
   const getIncomeList = async () => {
+    if (!user?.id) return;
     const result = await db
       .select({
         id: Incomes.id,
@@ -46,25 +49,28 @@ export const GlobalContextProvider = ({ children }) => {
         Icon: Incomes.Icon,
       })
       .from(Incomes)
-      .where(eq(Incomes.createdBy, user?.primaryEmailAddress?.emailAddress))
+      .where(eq(Incomes.userId, user.id)) // Now filtering by numeric ID
       .groupBy(Incomes.id);
-    result.length > 0 ? setIncomeList(result) : setIncomeList("");
+    
+    setIncomeList(result.length > 0 ? result : []);
   };
 
   const getAllExpenses = async () => {
+    if (!user?.id) return;
     const result = await db
       .select({
         id: expenses.id,
         name: expenses.name,
         expense: expenses.amount,
-        createdBy: expenses.createdBy,
         budgetId: expenses.budgetId,
-        createdAt: expenses.createdAt,
+        userId: expenses.userId,
         updatedAt: expenses.updatedAt,
+        createdAt: expenses.createdAt
       })
       .from(expenses)
-      .where(eq(expenses.createdBy, user?.primaryEmailAddress?.emailAddress))
+      .where(eq(expenses.userId, user.id)) // Now filtering by numeric ID
       .orderBy(desc(expenses.createdAt));
+    
     setExpenseList(result);
   };
 

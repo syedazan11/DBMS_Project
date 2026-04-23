@@ -32,8 +32,11 @@ const CreateIncome = ({ data, close }) => {
     },
   });
 
+
   const onSubmit = async (body) => {
-    if (!user?.primaryEmailAddress?.emailAddress) return;
+    // 1. Change check to user?.id
+    if (!user?.id) return; 
+    
     setLoading(true);
     try {
       data
@@ -42,19 +45,21 @@ const CreateIncome = ({ data, close }) => {
             .set({
               name: body.name,
               amount: body.amount,
-              createdBy: user.primaryEmailAddress.emailAddress,
+              userId: user.id, // 2. Use userId instead of createdBy
               Icon: body.Icon,
             })
             .where(eq(Incomes.id, data.id))
         : await db.insert(Incomes).values({
             name: body.name,
             amount: body.amount,
-            createdBy: user.primaryEmailAddress.emailAddress,
+            userId: user.id, // 3. Use userId instead of createdBy
             Icon: body.Icon || emojiIcon,
           });
+
       await getIncomeList();
       toast.success(data ? "Income Updated" : "Income Added!");
     } catch (error) {
+      console.error(error); 
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
@@ -62,7 +67,7 @@ const CreateIncome = ({ data, close }) => {
       data && close();
     }
   };
-
+  
   const onDelete = async () => {
     try {
       await db.delete(Incomes).where(eq(Incomes.id, data.id));
