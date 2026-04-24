@@ -93,13 +93,14 @@ export async function POST(request) {
   6. **Currency**
      - All data is in Pakistani rupees.
 
-  7. **No Code Output**:
-     - Do NOT write or output any computer code (like Python, JavaScript, etc.). You must calculate and analyze the data internally and provide the final answer directly in natural language.
+  7. **No Hypotheticals**:
+   - If the user asks for an analysis but their data lists are empty [], DO NOT create a "hypothetical scenario."
+   - Explicitly tell the user: "I see you haven't added any data yet. Please navigate to the Budgets and Income tabs to get started!"
 
   8. **Prompt**:
      ${prompt}
 
-  Respond professionally, analyzing the user's financial data or answering their questions **only when prompted**. For greetings or chitchat, keep responses simple and avoid financial analysis unless explicitly requested. If no data is provided then response appropriately.
+  Respond professionally. If the data lists are empty, explain that you need data to provide analysis, rather than creating hypothetical scenarios.
 `;
     } else {
       // Advice mode prompt (auto-generated summary)
@@ -114,7 +115,7 @@ export async function POST(request) {
 
         Instructions:
 
-        1.  If all of the lists are empty, respond with: "No financial data provided. Please input your income, budget, and expenses for analysis."
+        1.  If all of the lists (Budget, Income, Expenses) are empty, only respond with: "No financial data provided. Please input your income, budget, and expenses for analysis."
         2. All data is in Pakistani rupees.
         3.  Otherwise:
             a. Calculate total budget, income, and expenses.
