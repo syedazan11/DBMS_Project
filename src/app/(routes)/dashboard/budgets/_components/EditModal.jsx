@@ -48,7 +48,6 @@ const EditModal = ({ open, setOpen, obj, Table }) => {
         .set({
           name: data.name,
           amount: data.amount,
-          createdBy: data.createdBy,
           Icon: data.Icon,
         })
         .where(eq(Table.id, data.id));

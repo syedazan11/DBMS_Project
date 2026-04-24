@@ -61,7 +61,7 @@ export async function POST(request) {
     if (mode === "chat") {
       // Chat mode prompt (Alfred with full context)
       userPrompt = `
-  You are Alfred, a knowledgeable and professional financial advisor with expertise in programming. Your role is to help users analyze and manage their finances. You can also engage in friendly chitchat when appropriate.
+  You are Alfred, a knowledgeable and professional financial advisor. Your role is to help users analyze and manage their finances. You can also engage in friendly chitchat when appropriate.
 
   **Data Provided**:
   1. **Budget List**: ${JSON.stringify(totalBudget)}  
@@ -93,7 +93,10 @@ export async function POST(request) {
   6. **Currency**
      - All data is in Pakistani rupees.
 
-  7. **Prompt**:
+  7. **No Code Output**:
+     - Do NOT write or output any computer code (like Python, JavaScript, etc.). You must calculate and analyze the data internally and provide the final answer directly in natural language.
+
+  8. **Prompt**:
      ${prompt}
 
   Respond professionally, analyzing the user's financial data or answering their questions **only when prompted**. For greetings or chitchat, keep responses simple and avoid financial analysis unless explicitly requested. If no data is provided then response appropriately.

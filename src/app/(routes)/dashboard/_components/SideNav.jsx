@@ -57,6 +57,7 @@ const SideNav = ({ expand, mobileScreen, setExpand }) => {
             {menu.map((item, index) => {
               return (
                 <Link
+                  key={index}
                   onClick={() => setExpand(false)}
                   href={path == item.path ? "" : item.path}
                 >
@@ -66,7 +67,6 @@ const SideNav = ({ expand, mobileScreen, setExpand }) => {
                         ? "bg-primary text-white hover:bg-primary"
                         : "hover:bg-blue-50 text-gray-700"
                     }`}
-                    key={index}
                   >
                     {item.icon}
                     <h1>{item.name}</h1>
@@ -97,7 +97,7 @@ const SideNav = ({ expand, mobileScreen, setExpand }) => {
           >
             {menu.map((item, index) => {
               return (
-                <Link href={path == item.path ? "" : item.path}>
+                <Link key={index} href={path == item.path ? "" : item.path}>
                   <button
                     className={`flex items-center gap-4 rounded-full w-full p-4 
                                         ${
@@ -106,7 +106,6 @@ const SideNav = ({ expand, mobileScreen, setExpand }) => {
                                             : "hover:bg-blue-50 text-gray-700"
                                         }
                                         `}
-                    key={index}
                   >
                     {item.icon}
                     {!isCollapsed && <h1>{item.name}</h1>}

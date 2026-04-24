@@ -189,6 +189,14 @@ const Chat = () => {
             placeholder="Enter a prompt here"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (prompt.trim() !== "") {
+                  useChat();
+                }
+              }
+            }}
           />
           <button disabled={prompt === ""} onClick={useChat}>
             <Send className="text-primary" />

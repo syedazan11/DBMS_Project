@@ -26,7 +26,7 @@ const getBudgetList = async () => {
         Icon: Budgets.Icon,
         name: Budgets.name,
         // Removed createdBy (redundant email)
-        totalItem: sql`count(${Budgets.id})`,
+        totalItem: sql`count(${expenses.id})`,
         totalSpend: sql`sum(${expenses.amount})`,
         amount: Budgets.amount,
       })

@@ -37,7 +37,7 @@ function BudgetList() {
         </div>
         {incomeList.length > 0 &&
           incomeList.map((income) => (
-            <Dialog key={income.id} open={openDialogId === income.id}>
+            <Dialog key={income.id} open={openDialogId === income.id} onOpenChange={(open) => setOpenDialogId(open ? income.id : null)}>
               <DialogTrigger asChild>
                 <div>
                   <IncomeItem

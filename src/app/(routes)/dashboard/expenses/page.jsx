@@ -41,7 +41,7 @@ function ExpensesScreen() {
   const updatedColumns = [
     ...columns,
     {
-      accessorKey: "action",
+      id: "edit",
       header: "",
       cell: ({ row }) => (
         <Dialog>
@@ -55,7 +55,7 @@ function ExpensesScreen() {
       ),
     },
     {
-      accessorKey: "action",
+      id: "delete",
       header: "",
       cell: ({ row }) => (
         <Dialog>
