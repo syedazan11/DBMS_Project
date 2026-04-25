@@ -46,6 +46,20 @@ export const expenses = pgTable("expenses", {
   updatedAt: timestamp("updatedAt").notNull(),
 });
 
+// expense tagging schema (many-to-many)
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  color: varchar("color").default("#000000"),
+  userId: integer("userId").notNull().references(() => users.id),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export const expenseTags = pgTable("expense_tags", {
+  expenseId: integer("expenseId").notNull().references(() => expenses.id),
+  tagId: integer("tagId").notNull().references(() => tags.id),
+});
+
 export const chats = pgTable("chats", {
   id: varchar("id").notNull(),
   question: text("question").notNull(),

@@ -15,22 +15,64 @@ import {
 } from "@/components/ui/dialog";
 import LoaderButton from "@/app/_components/LoaderButton";
 import { db } from "../../../../../utils/dbConfig";
-import { expenses } from "../../../../../utils/schema";
+import { expenseTags, expenses } from "../../../../../utils/schema";
 import { eq } from "drizzle-orm";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter } from "lucide-react";
 
 function ExpensesScreen() {
   const { getAllExpenses, expenseList, budgetList, getBudgetList } =
     useGlobalContext();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expenseTagsMap, setExpenseTagsMap] = useState({});
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTagId, setSelectedTagId] = useState("all");
+
+  const getExpenseTags = async () => {
+    try {
+      const response = await fetch("/api/expenses/with-tags", {
+        cache: "no-store",
+      });
+      if (!response.ok) return;
+
+      const payload = await response.json();
+      const byExpenseId = (payload?.expenses || []).reduce((acc, item) => {
+        acc[item.id] = Array.isArray(item.tags) ? item.tags : [];
+        return acc;
+      }, {});
+      setExpenseTagsMap(byExpenseId);
+    } catch (error) {
+      console.error("Failed to fetch expense tags:", error);
+    }
+  };
+
+  const getAvailableTags = async () => {
+    try {
+      const response = await fetch("/api/tags", { cache: "no-store" });
+      if (!response.ok) return;
+      const payload = await response.json();
+      setAvailableTags(Array.isArray(payload?.tags) ? payload.tags : []);
+    } catch (error) {
+      console.error("Failed to fetch all tags:", error);
+    }
+  };
 
   const onDelete = async (id) => {
     setLoading(true);
     try {
+      await db.delete(expenseTags).where(eq(expenseTags.expenseId, id));
       await db.delete(expenses).where(eq(expenses.id, id));
       toast.success("Expense Deleted!");
       await getAllExpenses();
+      await getExpenseTags();
     } catch (error) {
       toast.error("Error Deleting Expense!");
     } finally {
@@ -49,7 +91,10 @@ function ExpensesScreen() {
             <Pen className="w-5 h-5 text-primary" />
           </DialogTrigger>
           <DialogContent>
-            <AddExpense data={row.original} />
+            <AddExpense data={row.original} onUpdated={() => {
+              getExpenseTags();
+              getAvailableTags();
+            }} />
           </DialogContent>
         </Dialog>
       ),
@@ -91,7 +136,7 @@ function ExpensesScreen() {
 
   const updateData = () => {
     if (expenseList && budgetList) {
-      const filteredExpenses = expenseList
+      let filteredExpenses = expenseList
         .filter((expense) =>
           budgetList.some((budget) => budget.id === expense.budgetId)
         )
@@ -103,8 +148,17 @@ function ExpensesScreen() {
             ...expense,
             Icon: matchingBudget?.Icon || null,
             budgetName: matchingBudget?.name || null,
+            tags: expenseTagsMap[expense.id] || [],
           };
         });
+
+      // Apply tag filter
+      if (selectedTagId !== "all") {
+        filteredExpenses = filteredExpenses.filter((expense) =>
+          expense.tags.some((tag) => tag.id.toString() === selectedTagId)
+        );
+      }
+
       setData(filteredExpenses);
     }
   };
@@ -112,24 +166,56 @@ function ExpensesScreen() {
   useEffect(() => {
     getAllExpenses();
     getBudgetList();
+    getExpenseTags();
+    getAvailableTags();
   }, []);
 
   useEffect(() => {
     updateData();
-  }, [expenseList, budgetList]);
+  }, [expenseList, budgetList, expenseTagsMap, selectedTagId]);
 
   return (
     <div className="p-4 md:p-10">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="font-bold text-3xl">My Expenses</h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            {Array.isArray(budgetList) && <Button>Add Expense</Button>}
-          </DialogTrigger>
-          <DialogContent>
-            <AddExpense />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-gray-500" />
+            <Select
+              value={selectedTagId}
+              onValueChange={(value) => setSelectedTagId(value)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tags</SelectItem>
+                {availableTags.map((tag) => (
+                  <SelectItem key={tag.id} value={tag.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      {tag.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              {Array.isArray(budgetList) && <Button>Add Expense</Button>}
+            </DialogTrigger>
+            <DialogContent>
+              <AddExpense onUpdated={() => {
+                getExpenseTags();
+                getAvailableTags();
+              }} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       {!Array.isArray(budgetList) && <h1 className="pt-2 blink">Add Budgets in order to add expenses.</h1>}
       <DataTable columns={updatedColumns} data={data} />

@@ -109,20 +109,20 @@ const page = () => {
             <BarChart budgetList={budgetList} />
           </div>
           {budgetList.length > 0 ? (
-            <Link
-              href="/dashboard/budgets"
-              className="w-full lg:w-1/3 min-w-[350px] flex flex-wrap gap-6 p-4"
-            >
-              <h1 className="text-2xl h-max font-semibold">Latest Budgets</h1>
-              <div className="flex flex-wrap gap-4">
-                {budgetList.slice(0, 2).map((budget, index) => (
+            <div className="w-full lg:w-1/3 flex flex-col gap-6 p-4">
+              <h1 className="text-2xl font-bold">Latest Budgets</h1>
+              <div className="flex flex-col gap-4">
+                {budgetList.slice(0, 3).map((budget, index) => (
                   <BudgetItem budget={budget} key={index} />
                 ))}
               </div>
-              {budgetList.length > 2 ? (
-                <div className="text-slate-500 mt-[-1rem]">See all Budgets</div>
-              ) : null}
-            </Link>
+              <Link
+                href="/dashboard/budgets"
+                className="text-primary font-medium hover:underline"
+              >
+                See all Budgets
+              </Link>
+            </div>
           ) : (
             ""
           )}
